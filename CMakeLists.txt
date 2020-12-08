@@ -12,9 +12,9 @@ include(CheckIncludeFile)
 include(CheckSymbolExists)
 
 set(LIBS_REQUIRED ioth)
-set(HEADERS_REQUIRED libioth.h vunet.h nlinline.h strcase.h)
+set(HEADERS_REQUIRED libioth.h vunet.h nlinline.h strcase.h stropt.h)
 set(CMAKE_REQUIRED_QUIET TRUE)
-set(CMAKE_REQUIRED_LIBRARIES slirp)
+set(CMAKE_REQUIRED_LIBRARIES stropt)
 
 foreach(THISLIB IN LISTS LIBS_REQUIRED)
   find_library(LIB${THISLIB}_OK ${THISLIB})
@@ -34,7 +34,7 @@ add_definitions(-D_GNU_SOURCE)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(vunetioth SHARED vunetioth.c)
-target_link_libraries(vunetioth -lioth)
+target_link_libraries(vunetioth -lioth -lstropt)
 
 set_target_properties(vunetioth PROPERTIES PREFIX "")
 

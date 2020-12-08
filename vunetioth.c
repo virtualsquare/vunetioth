@@ -1,8 +1,10 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <vunet.h>
 #include <libioth.h>
+#include <stropt.h>
 
 static int supported_domain (int domain) {
   switch (domain) {
@@ -65,11 +67,52 @@ static int vunetioth_accept4(int fd, struct sockaddr *addr, socklen_t *addrlen, 
   return ioth_accept(fd, addr, addrlen);
 }
 
-int vunetioth_init(const char *source, unsigned long flags, const char *args, void **private_data) {
-  struct ioth *vdestack = ioth_newstacki(source, args);
-	/* printf("source %s\nargs %s\n",source,args); */
-  if (vdestack != NULL) {
-    *private_data = vdestack;
+/* mount -t vunetioth -o "if=vde://" vdestack /dev/net/n1
+ *          => ioth_newstackv("vdestack", ["vde//", NULL])
+ * ('if=' can be omitted if the option includes ://)
+ * mount -t vunetioth -o "vde://" vdestack /dev/net/n1
+ *          => ioth_newstackv("vdestack", ["vde//", NULL])
+ * mount -t vunetioth -o "vde://,vxvde://" vdestack /dev/net/n2
+ *          => ioth_newstackv("vdestack", ["vde//", "vxvde://", NULL])
+ * mount -t vunetioth -o "eth0:vde://,eth1:vxvde://,option1" vdestack /dev/net/n3
+ *          => ioth_newstackv("vdestack,option1", ["eth0:vde//", "eth1:vxvde://", NULL])
+ */
+int vunetioth_init(const char *source, unsigned long flags, const char *mntargs, void **private_data) {
+  struct ioth *iothstack;
+	int tagc;
+	if (mntargs == NULL) mntargs = "";
+	if ((tagc = stropt(mntargs, NULL, NULL, NULL)) > 0) {
+		char buf[strlen(mntargs) + 1];
+    char *tags[tagc + 1];
+    char *args[tagc + 1];
+    char *vnl[tagc];
+    char *stack_plus_options;
+    int index = 0;
+    tags[0] = (char *) source;
+    args[0] = NULL;
+    stropt(mntargs, tags + 1, args + 1, buf);
+    for (int i = 1; i<tagc; i++) {
+      if (strstr(tags[i], "://") && args[i] == NULL) {
+        vnl[index++] = tags[i];
+        tags[i] = STROPTX_DELETED_TAG;
+      } else if (strcmp(tags[i],"if") == 0 && args[i] != NULL) {
+        vnl[index++] = args[i];
+        tags[i] = STROPTX_DELETED_TAG;
+      }
+    }
+    vnl[index] = NULL;
+    stack_plus_options = stropt2str(tags, args, ',', '=');
+#if 0
+		printf("%s\n", stack_plus_options);
+		for (int i = 0; vnl[i]; i++)
+			printf("%d %s\n", i, vnl[i]);
+#endif
+		iothstack = ioth_newstackv(stack_plus_options, (const char **) vnl);
+		free(stack_plus_options);
+	} else
+		iothstack = ioth_newstack(source);
+  if (iothstack != NULL) {
+    *private_data = iothstack;
     return 0;
   } else {
     errno = EINVAL;
