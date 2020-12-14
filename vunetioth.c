@@ -46,42 +46,35 @@ static int _ioth_socket(int domain, int type, int protocol) {
   struct ioth *stack = vunet_get_private_data();
 	type &= ~SOCK_CLOEXEC;
   int rv = ioth_msocket(stack, domain, type & ~SOCK_NONBLOCK, protocol);
-	/* printf("ioth_msocket %d %d\n", rv, errno); */
+	/* printf("ioth_msocket %p %d %d\n", stack, rv, errno); */
 	if (rv >= 0 && (type & SOCK_NONBLOCK) != 0)
 		ioth_fcntl(rv, F_SETFL, O_NONBLOCK);
 	return rv;
 }
 
-static int vunetioth_ioctl(int fd, unsigned long request, void *addr) {
-	if (fd == -1 && addr == NULL) {
-		int retval = vunet_ioctl_parms(request);
-		if (retval == 0) {
-			errno = ENOSYS; return -1;
-		} else
-			return retval;
-	} else {
-		int tmpfd, retval;
-		switch (request) {
-			case FIONREAD:
-			case FIONBIO:
-				//printf("forward  ioctl\n");
-				if (fd == -1)
-					return errno = EINVAL, -1;
-				else
-					return ioth_ioctl(fd, request, addr);
-			default:
-				//printf("fake netlink socket\n");
-				tmpfd = _ioth_socket(AF_NETLINK, SOCK_RAW|SOCK_CLOEXEC, 0);
-				if (tmpfd < 0)
-					return -1;
-				else {
-					retval = ioth_ioctl(tmpfd, request, addr);
-					ioth_close(tmpfd);
-					return retval;
+static int vunetioth_ioctl (int fd, unsigned long request, void *addr) {
+  if (fd == -1) {
+    if (addr == NULL) {
+      int retval = vunet_ioctl_parms(request);
+      if (retval == 0) {
+        errno = ENOSYS; return -1;
+      } else
+        return retval;
+    } else {
+      int tmpfd = _ioth_socket(AF_INET, SOCK_DGRAM|SOCK_CLOEXEC, 0);
+      int retval;
+      if (tmpfd < 0)
+        return -1;
+      else {
+        retval = ioth_ioctl(tmpfd, request, addr);
+        close(tmpfd);
+        return retval;
       }
     }
-	}
+  } else
+    return ioth_ioctl(fd, request, addr);
 }
+
 
 static int vunetioth_accept4(int fd, struct sockaddr *addr, socklen_t *addrlen, int flags) {
   return ioth_accept(fd, addr, addrlen);
