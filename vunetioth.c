@@ -23,7 +23,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <vunet.h>
-#include <libioth.h>
+#include <ioth.h>
 #include <stropt.h>
 
 static int supported_domain (int domain) {
