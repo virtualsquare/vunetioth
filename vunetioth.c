@@ -123,7 +123,7 @@ int vunetioth_init(const char *source, unsigned long flags, const char *mntargs,
 		iothstack = ioth_newstackv(stack_plus_options, (const char **) vnl);
 		free(stack_plus_options);
 	} else
-		iothstack = ioth_newstack(source);
+		iothstack = ioth_newstack(source, NULL);
   if (iothstack != NULL) {
     *private_data = iothstack;
     return 0;
