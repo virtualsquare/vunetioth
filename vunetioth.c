@@ -27,25 +27,25 @@
 #include <stropt.h>
 
 static int supported_domain (int domain) {
-  switch (domain) {
-    case AF_INET:
-    case AF_INET6:
-    case AF_NETLINK:
-    case AF_PACKET:
-      return 1;
-    default:
-      return 0;
-  }
+	switch (domain) {
+		case AF_INET:
+		case AF_INET6:
+		case AF_NETLINK:
+		case AF_PACKET:
+			return 1;
+		default:
+			return 0;
+	}
 }
 
 static int supported_ioctl (unsigned long request) {
-  return vunet_is_netdev_ioctl(request);
+	return vunet_is_netdev_ioctl(request);
 }
 
 static int _ioth_socket(int domain, int type, int protocol) {
-  struct ioth *stack = vunet_get_private_data();
+	struct ioth *stack = vunet_get_private_data();
 	type &= ~SOCK_CLOEXEC;
-  int rv = ioth_msocket(stack, domain, type & ~SOCK_NONBLOCK, protocol);
+	int rv = ioth_msocket(stack, domain, type & ~SOCK_NONBLOCK, protocol);
 	/* printf("ioth_msocket %p %d %d\n", stack, rv, errno); */
 	if (rv >= 0 && (type & SOCK_NONBLOCK) != 0)
 		ioth_fcntl(rv, F_SETFL, O_NONBLOCK);
@@ -53,31 +53,32 @@ static int _ioth_socket(int domain, int type, int protocol) {
 }
 
 static int vunetioth_ioctl (int fd, unsigned long request, void *addr) {
-  if (fd == -1) {
-    if (addr == NULL) {
-      int retval = vunet_ioctl_parms(request);
-      if (retval == 0) {
-        errno = ENOSYS; return -1;
-      } else
-        return retval;
-    } else {
-      int tmpfd = _ioth_socket(AF_INET, SOCK_DGRAM|SOCK_CLOEXEC, 0);
-      int retval;
-      if (tmpfd < 0)
-        return -1;
-      else {
-        retval = ioth_ioctl(tmpfd, request, addr);
-        close(tmpfd);
-        return retval;
-      }
-    }
-  } else
-    return ioth_ioctl(fd, request, addr);
+	if (fd == -1) {
+		if (addr == NULL) {
+			int retval = vunet_ioctl_parms(request);
+			if (retval == 0) {
+				errno = ENOSYS; return -1;
+			} else
+				return retval;
+		} else {
+			int tmpfd = _ioth_socket(AF_INET, SOCK_DGRAM|SOCK_CLOEXEC, 0);
+			int retval;
+			if (tmpfd < 0)
+				return -1;
+			else {
+				retval = ioth_ioctl(tmpfd, request, addr);
+				close(tmpfd);
+				return retval;
+			}
+		}
+	} else
+		return ioth_ioctl(fd, request, addr);
 }
 
 
 static int vunetioth_accept4(int fd, struct sockaddr *addr, socklen_t *addrlen, int flags) {
-  return ioth_accept(fd, addr, addrlen);
+	(void) flags;
+	return ioth_accept(fd, addr, addrlen);
 }
 
 /* mount -t vunetioth -o "if=vde://" vdestack /dev/net/n1
@@ -91,30 +92,31 @@ static int vunetioth_accept4(int fd, struct sockaddr *addr, socklen_t *addrlen, 
  *          => ioth_newstackv("vdestack,option1", ["eth0:vde//", "eth1:vxvde://", NULL])
  */
 int vunetioth_init(const char *source, unsigned long flags, const char *mntargs, void **private_data) {
-  struct ioth *iothstack;
+	(void) flags;
+	struct ioth *iothstack;
 	int tagc;
 	if (mntargs == NULL) mntargs = "";
 	if ((tagc = stropt(mntargs, NULL, NULL, NULL)) > 0) {
 		char buf[strlen(mntargs) + 1];
-    char *tags[tagc + 1];
-    char *args[tagc + 1];
-    char *vnl[tagc];
-    char *stack_plus_options;
-    int index = 0;
-    tags[0] = (char *) source;
-    args[0] = NULL;
-    stropt(mntargs, tags + 1, args + 1, buf);
-    for (int i = 1; i<tagc; i++) {
-      if (strstr(tags[i], "://") && args[i] == NULL) {
-        vnl[index++] = tags[i];
-        tags[i] = STROPTX_DELETED_TAG;
-      } else if (strcmp(tags[i],"if") == 0 && args[i] != NULL) {
-        vnl[index++] = args[i];
-        tags[i] = STROPTX_DELETED_TAG;
-      }
-    }
-    vnl[index] = NULL;
-    stack_plus_options = stropt2str(tags, args, ',', '=');
+		char *tags[tagc + 1];
+		char *args[tagc + 1];
+		char *vnl[tagc];
+		char *stack_plus_options;
+		int index = 0;
+		tags[0] = (char *) source;
+		args[0] = NULL;
+		stropt(mntargs, tags + 1, args + 1, buf);
+		for (int i = 1; i<tagc; i++) {
+			if (strstr(tags[i], "://") && args[i] == NULL) {
+				vnl[index++] = tags[i];
+				tags[i] = STROPTX_DELETED_TAG;
+			} else if (strcmp(tags[i],"if") == 0 && args[i] != NULL) {
+				vnl[index++] = args[i];
+				tags[i] = STROPTX_DELETED_TAG;
+			}
+		}
+		vnl[index] = NULL;
+		stack_plus_options = stropt2str(tags, args, ',', '=');
 #if 0
 		printf("%s\n", stack_plus_options);
 		for (int i = 0; vnl[i]; i++)
@@ -124,42 +126,42 @@ int vunetioth_init(const char *source, unsigned long flags, const char *mntargs,
 		free(stack_plus_options);
 	} else
 		iothstack = ioth_newstack(source, NULL);
-  if (iothstack != NULL) {
-    *private_data = iothstack;
-    return 0;
-  } else {
-    errno = EINVAL;
-    return -1;
-  }
+	if (iothstack != NULL) {
+		*private_data = iothstack;
+		return 0;
+	} else {
+		errno = EINVAL;
+		return -1;
+	}
 }
 
 int vunetioth_fini(void *private_data) {
-  ioth_delstack(private_data);
-  return 0;
+	ioth_delstack(private_data);
+	return 0;
 }
 
 struct vunet_operations vunet_ops = {
-  .socket = _ioth_socket,
-  .bind = ioth_bind,
-  .connect = ioth_connect,
-  .listen = ioth_listen,
-  .accept4 = vunetioth_accept4,
-  .getsockname = ioth_getsockname,
-  .getpeername = ioth_getpeername,
-  .recvmsg = ioth_recvmsg,
-  .sendmsg = ioth_sendmsg,
-  .getsockopt = ioth_getsockopt,
-  .setsockopt = ioth_setsockopt,
-  .shutdown = ioth_shutdown,
+	.socket = _ioth_socket,
+	.bind = ioth_bind,
+	.connect = ioth_connect,
+	.listen = ioth_listen,
+	.accept4 = vunetioth_accept4,
+	.getsockname = ioth_getsockname,
+	.getpeername = ioth_getpeername,
+	.recvmsg = ioth_recvmsg,
+	.sendmsg = ioth_sendmsg,
+	.getsockopt = ioth_getsockopt,
+	.setsockopt = ioth_setsockopt,
+	.shutdown = ioth_shutdown,
 	.ioctl = vunetioth_ioctl,
-  .close = ioth_close,
+	.close = ioth_close,
 
-  .epoll_ctl = epoll_ctl,
+	.epoll_ctl = epoll_ctl,
 
-  .supported_domain = supported_domain,
-  .supported_ioctl = supported_ioctl,
+	.supported_domain = supported_domain,
+	.supported_ioctl = supported_ioctl,
 
-  .init = vunetioth_init,
-  .fini = vunetioth_fini,
+	.init = vunetioth_init,
+	.fini = vunetioth_fini,
 };
 

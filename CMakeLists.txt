@@ -5,7 +5,7 @@ project("vunetioth"
     VERSION 0.1.0
     LANGUAGES C)
 
-# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_FORTIFY_SOURCE=2 -O2 -pedantic -Wall -Wextra")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_FORTIFY_SOURCE=2 -O2 -pedantic -Wall -Wextra")
 
 include(GNUInstallDirs)
 include(CheckIncludeFile)
@@ -40,8 +40,11 @@ set_target_properties(vunetioth PROPERTIES PREFIX "")
 
 install(TARGETS vunetioth DESTINATION ${CMAKE_INSTALL_LIBDIR}/vu/modules)
 
-#add_subdirectory(man)
-#
+add_executable(iplink iplink.c)
+install(TARGETS iplink DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+add_subdirectory(man)
+
 add_custom_target(uninstall
   "${CMAKE_COMMAND}" -P "${PROJECT_SOURCE_DIR}/Uninstall.cmake")
 
