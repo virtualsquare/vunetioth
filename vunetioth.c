@@ -18,6 +18,8 @@
  *
  */
 
+#define SPDX_LICENSE "SPDX-License-Identifier: GPL-2.0-or-later"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -122,6 +124,7 @@ int vunetioth_init(const char *source, unsigned long flags, const char *mntargs,
 		for (int i = 0; vnl[i]; i++)
 			printf("%d %s\n", i, vnl[i]);
 #endif
+		ioth_set_license(SPDX_LICENSE);
 		iothstack = ioth_newstackv(stack_plus_options, (const char **) vnl);
 		free(stack_plus_options);
 	} else
