@@ -77,7 +77,6 @@ static int vunetioth_ioctl (int fd, unsigned long request, void *addr) {
 		return ioth_ioctl(fd, request, addr);
 }
 
-
 static int vunetioth_accept4(int fd, struct sockaddr *addr, socklen_t *addrlen, int flags) {
 	(void) flags;
 	return ioth_accept(fd, addr, addrlen);
@@ -157,6 +156,7 @@ struct vunet_operations vunet_ops = {
 	.setsockopt = ioth_setsockopt,
 	.shutdown = ioth_shutdown,
 	.ioctl = vunetioth_ioctl,
+	.fcntl = ioth_fcntl,
 	.close = ioth_close,
 
 	.epoll_ctl = epoll_ctl,
