@@ -1,6 +1,3 @@
-iplink(1) -- add/delete generic interfaces
-====
-
 <!--
 .\" Copyright (C) 2019 VirtualSquare. Project Leader: Renzo Davoli
 .\"
@@ -25,8 +22,11 @@ iplink(1) -- add/delete generic interfaces
 .\" MA 02110-1301 USA.
 .\"
 -->
+# NAME
 
-## SYNOPSIS
+iplink(1) -- add/delete generic interfaces
+
+# SYNOPSIS
 
 `iplink add` [ [ `name` ] _NAME_ ] [ `index` _IDX_ ] [ `data` _DATA_ ] `type` _TYPE_
 
@@ -34,36 +34,36 @@ iplink(1) -- add/delete generic interfaces
 
 `iplink del` [ _DEVICE_ \| `dev` _DEVICE_ ] [ `index` _IDX_ ] [ `type` _TYPE_ ]
 
-## DESCRIPTION
+# DESCRIPTION
 
 `iplink` allow users to add or delete interfaces whose types are not supported by `ip-link`(8).
 
 ### iplink add
 `iplink add` adds a generic interface of type _TYPE_.
 
-  *  `name` _NAME_:
-    sets the name of the new interface. (the tag `name` can be omitted).
+   `name` _NAME_
+: sets the name of the new interface. (the tag `name` can be omitted).
 
-  * `index` _IDX_:
-    specifies the desired index of the new virtual device.
+  `index` _IDX_
+: specifies the desired index of the new virtual device.
 
-  * `data` _DATA_ :
-    adds specific data to configure the interface. The meaning depends upon the type of the interface.
+  `data` _DATA_ 
+: adds specific data to configure the interface. The meaning depends upon the type of the interface.
 
 ###  iplink del -- iplink delete
 `iplink del` or `iplink delete` deletes an interface. At least one option between `dev` or `index` must
 be selected.
 
-  * `dev` _DEVICE_:
-    select the interface by its name. (the tag `dev` can be omitted).
+  `dev` _DEVICE_
+: select the interface by its name. (the tag `dev` can be omitted).
 
-  * `index` _IDX_:
-    select the interface by its index.
+  `index` _IDX_
+: select the interface by its index.
 
-  * `type` _TYPE_:
-    specify the interface type (currently ignored).
+  `type` _TYPE_
+: specify the interface type (currently ignored).
 
-## EXANPLE
+# EXANPLE
 
 In a `umvu` session:
 ```
@@ -71,14 +71,14 @@ $ vu_insmod vunet
 $ mount -t vunetpicox none /dev/n
 $ vustack /dev/n iplink add vde1 type vde data vxvde://234.0.0.1
 $ vustack /dev/n ip link
-2090479455: loop: <UP> mtu 1500
-    link/netrom 00:00:00:00:00:00 brd ff:ff:ff:ff:ff:ff
-2090826453: vde1: <UP> mtu 1500
-    link/netrom 80:00:47:2f:13:d8 brd ff:ff:ff:ff:ff:ff
+2090479455: loop: *UP* mtu 1500
+: link/netrom 00:00:00:00:00:00 brd ff:ff:ff:ff:ff:ff
+2090826453: vde1: *UP* mtu 1500
+: link/netrom 80:00:47:2f:13:d8 brd ff:ff:ff:ff:ff:ff
 ```
 
-## SEE ALSO
+# SEE ALSO
 umvu(1), ip(8), ip-link(8)
 
-## AUTHOR
+# AUTHOR
 VirtualSquare. Project leader: Renzo Davoli.
