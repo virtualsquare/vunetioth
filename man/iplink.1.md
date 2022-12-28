@@ -68,9 +68,9 @@ be selected.
 In a `umvu` session:
 ```
 $ vu_insmod vunet
-$ mount -t vunetpicox none /dev/n
-$ vustack /dev/n iplink add vde1 type vde data vxvde://234.0.0.1
-$ vustack /dev/n ip link
+$ vumount -t vunetioth picox /dev/net/mynet
+$ vustack /dev/net/mynet iplink add vde1 type vde data vxvde://234.0.0.1
+$ vustack /dev/net/mynet ip link
 2090479455: loop: *UP* mtu 1500
 : link/netrom 00:00:00:00:00:00 brd ff:ff:ff:ff:ff:ff
 2090826453: vde1: *UP* mtu 1500
