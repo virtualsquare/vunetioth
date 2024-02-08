@@ -7,10 +7,10 @@
 
 char *progname;
 void usage(void) {
-	fprintf(stderr, 
+	fprintf(stderr,
 			"Usage: %s add [ name ] NAME\n"
 			"                    [ index IDX ]\n"
-			"                    [ data DATA ]\n"
+			"                    [ vnl DATA ]\n"
 			"                    type TYPE\n\n"
 			"       %s del { DEVICE | dev DEVICE }\n"
 			"                    [index IDX ]\n"
@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
 	char *name = NULL;
 	char *type = NULL;
 	char *sindex = NULL;
-	char *data = NULL;
+	char *vnl = NULL;
 	int i;
 	unsigned int index = 0;
 
@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
 	if (argc < 3)
 		usage();
 	switch(strcase(argv[1])) {
-		case STRCASE(a,d,d):  iplink_op = IPLINK_ADD; 
+		case STRCASE(a,d,d):  iplink_op = IPLINK_ADD;
 													break;
 		case STRCASE(d,e,l,e,t,e):
 		case STRCASE(d,e,l): iplink_op = IPLINK_DEL;
@@ -60,9 +60,10 @@ int main(int argc, char *argv[]) {
 				if (++i >= argc) usage();
 				sindex = argv[i];
 				break;
+			case STRCASE(v,n,l):
 			case STRCASE(d,a,t,a):
 				if (++i >= argc) usage();
-				data = argv[i];
+				vnl = argv[i];
 				break;
 			default:
 				if (name == NULL)
@@ -76,7 +77,8 @@ int main(int argc, char *argv[]) {
 		case IPLINK_ADD:
 			if (name == NULL) usage();
 			if (type == NULL) usage();
-			rv = nlinline_iplink_add(name, index, type, data);
+			rv = nlinline_iplink_add(name, index, type,
+					nl_iplink_strdata(IFLA_VDE_VNL, vnl));
 			break;
 		case IPLINK_DEL:
 			if (name == NULL && index == 0) usage();
